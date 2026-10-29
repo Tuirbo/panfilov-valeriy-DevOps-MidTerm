@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        maven 'Maven-17'
+    }
+
     environment {
         IMAGE_NAME = 'panfilov-valeriy-api:v1.0-panfilov-valeriy'
         STUDENT_NAME = 'Valeriy Panfilov'
@@ -16,30 +20,23 @@ pipeline {
 
         stage('Build & Package') {
             steps {
-                echo "Building application inside Maven Docker container..."
-                sh 'docker run --rm -v $(pwd):/app -w /app maven:3.8.6-eclipse-temurin-17 mvn clean package -DskipTests'
+                echo "Building application..."
+                sh 'mvn clean package -DskipTests'
             }
         }
 
         stage('Test') {
             steps {
-                echo "Running unit tests inside Maven Docker container..."
-                sh 'docker run --rm -v $(pwd):/app -w /app maven:3.8.6-eclipse-temurin-17 mvn test'
+                echo "Running unit tests..."
+                sh 'mvn test'
             }
         }
 
-        stage('Docker Build') {
+        stage('Verify Artifact') {
             steps {
-                echo "Building Docker image: ${IMAGE_NAME}..."
-                sh "docker build -t ${IMAGE_NAME} ."
-            }
-        }
-
-        stage('Verify') {
-            steps {
-                echo "Verifying Docker image existence..."
-                sh "docker images | grep panfilov-valeriy-api"
-                echo "Build finished successfully for ${STUDENT_NAME}!"
+                echo "Verifying generated JAR file..."
+                sh 'ls -la target/*.jar'
+                echo "Build completed successfully for ${STUDENT_NAME}!"
             }
         }
     }
