@@ -14,17 +14,17 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build & Package') {
             steps {
-                echo "Building Spring Boot application..."
-                sh 'mvn clean package -DskipTests'
+                echo "Building application inside Maven Docker container..."
+                sh 'docker run --rm -v $(pwd):/app -w /app maven:3.8.6-eclipse-temurin-17 mvn clean package -DskipTests'
             }
         }
 
         stage('Test') {
             steps {
-                echo "Running unit tests..."
-                sh 'mvn test'
+                echo "Running unit tests inside Maven Docker container..."
+                sh 'docker run --rm -v $(pwd):/app -w /app maven:3.8.6-eclipse-temurin-17 mvn test'
             }
         }
 
